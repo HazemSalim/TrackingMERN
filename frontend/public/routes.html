@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css"
+    />
+    <link
+      rel="stylesheet"
+      href="http://js.arcgis.com/3.7/js/esri/css/esri.css"
+    />
+
+    <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-geocoding@3.0.0/dist/umd/geocoding.umd.js"></script>
+
+    <script>
+      var locations = "";
+      const apiKey =
+        "AAPK137781fbba094c7ea63c9bd7d3825ccdxIyEC8goPkn0O553811whxjQ7A2ljG-R4_7Ta3-PuGYPyBf0bPK_b_xPbx-haT7t";
+
+      const authentication = new arcgisRest.ApiKey({
+        key: apiKey,
+      });
+
+      const start = async () => {
+        var initialLocations = getQueryValueByKey("locs").split("$^");
+        await asyncForEach(initialLocations, async (location) => {
+          if (location) {
+            const response = await arcgisRest.geocode({
+              address: location,
+              countryCode: "USA",
+              authentication,
+            });
+
+            if (response.candidates.length > 0) {
+              locations +=
+                response.candidates[0].location.x +
+                "," +
+                response.candidates[0].location.y +
+                "$^";
+            }
+          }
+        });
+
+        window.location.href = "map.html?locs=" + locations.slice(0, -2);
+      };
+      start();
+
+      async function asyncForEach(array, callback) {
+        for (let index = 0; index < array.length; index++) {
+          await callback(array[index], index, array);
+        }
+      }
+
+      function lon2tile(lon, zoom) {
+        return Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
+      }
+      function lat2tile(lat, zoom) {
+        return Math.floor(
+          ((1 -
+            Math.log(
+              Math.tan((lat * Math.PI) / 180) +
+                1 / Math.cos((lat * Math.PI) / 180)
+            ) /
+              Math.PI) /
+            2) *
+            Math.pow(2, zoom)
+        );
+      }
+
+      function getQueryValueByKey(key) {
+        var queryStringValue = decodeURIComponent(
+          window.location.search.replace(
+            new RegExp(
+              "^(?:.*[&\\?]" +
+                encodeURIComponent(key).replace(/[\.\+\*]/g, "\\$&") +
+                "(?:\\=([^&]*))?)?.*$",
+              "i"
+            ),
+            "$1"
+          )
+        );
+        return queryStringValue;
+      }
+    </script>
+  </head>
+</html>

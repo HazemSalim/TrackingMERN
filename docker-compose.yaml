@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  mymongodb:
+    image: "mongo"
+    container_name: "mymongodb"
+    ports:
+      - "27017:27017"
+    volumes:
+      - data:/data/db
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "hazemusr"
+      MONGO_INITDB_ROOT_PASSWORD: "7@zem5@lim"
+
+  api:
+    build: ./api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mymongodb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+
+    depends_on:
+      - api
+
+volumes:
+  data:
