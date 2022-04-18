@@ -10,6 +10,7 @@ const { dispatch } = store;
 
 export async function getTrackingsData(filter) {
   const token = store.getState().user?.user?.token;
+  if (!token) return;
   dispatch({
     type: SET_LOADING,
     payload: true,
@@ -42,6 +43,7 @@ export async function getTrackingsData(filter) {
 
 export async function getDashboardData() {
   const token = store.getState().user?.user?.token;
+  if (!token) return;
   dispatch({
     type: SET_LOADING,
     payload: true,
@@ -74,6 +76,7 @@ export async function getDashboardData() {
 
 export async function downloadIcalFile(file) {
   const token = store.getState().user?.user?.token;
+  if (!token) return;
   try {
     const res = await downloadIcalFileAPI(file, token);
     return await res.blob();
